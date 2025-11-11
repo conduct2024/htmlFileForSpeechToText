@@ -1,69 +1,39 @@
-
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset='UTF-8'>
-<style>
-  body {
-    font-family: Arial;
-    padding: 10px;
-    margin: 0;
-    background: #fafafa;
-  }
-  #editor {
-    border: 1px solid #ccc;
-    min-height: 200px;
-    padding: 8px;
-    border-radius: 8px;
-    background: white;
-    outline: none;
-  }
-  #status {
-    margin-top: 10px;
-    color: green;
-  }
-  *:focus {
-    outline: none !important;
-  }
-</style>
+<meta charset="UTF-8">
+<title>Speech Recognizer</title>
 </head>
 <body>
-  <div id='editor' contenteditable='true'></div>
-  <div id='status'></div>
-
+  <h3>🎤 Speak now...</h3>
   <script>
-    let recognition;
-    function startListening() {
-      if (!('webkitSpeechRecognition' in window)) {
-        alert('Speech Recognition not supported');
-        return;
+    let recognition = new webkitSpeechRecognition();
+    recognition.lang = 'en-IN';
+    recognition.continuous = true;
+    recognition.interimResults = false;
+
+    recognition.onresult = function(event) {
+      let text = '';
+      for (let i = 0; i < event.results.length; i++) {
+        text += event.results[i][0].transcript + ' ';
       }
-      recognition = new webkitSpeechRecognition();
-      recognition.lang = 'en-IN';
-      recognition.continuous = true;
-      recognition.interimResults = true;
 
-      recognition.onresult = function(e) {
-        let text = '';
-        for (let i = 0; i < e.results.length; i++) {
-          text += e.results[i][0].transcript + ' ';
-        }
-        document.getElementById('editor').innerText = text;
-      };
+      // Send text to C# app
+      fetch("http://localhost:5050/", {
+        method: "POST",
+        body: text
+      });
+    };
 
-      recognition.onerror = function(e) {
-        document.getElementById('status').innerText = 'Error: ' + e.error;
-      };
+    recognition.onerror = function(e) {
+      alert("Error: " + e.error);
+    };
 
-      recognition.start();
-    }
+    recognition.onend = function() {
+      window.close();
+    };
 
-    function stopListening() {
-      if (recognition) recognition.stop();
-    }
-
-    window.startListening = startListening;
-    window.stopListening = stopListening;
+    recognition.start();
   </script>
 </body>
 </html>
