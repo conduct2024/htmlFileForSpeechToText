@@ -1,0 +1,69 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='UTF-8'>
+<style>
+  body {
+    font-family: Arial;
+    padding: 10px;
+    margin: 0;
+    background: #fafafa;
+  }
+  #editor {
+    border: 1px solid #ccc;
+    min-height: 200px;
+    padding: 8px;
+    border-radius: 8px;
+    background: white;
+    outline: none;
+  }
+  #status {
+    margin-top: 10px;
+    color: green;
+  }
+  *:focus {
+    outline: none !important;
+  }
+</style>
+</head>
+<body>
+  <div id='editor' contenteditable='true'></div>
+  <div id='status'></div>
+
+  <script>
+    let recognition;
+    function startListening() {
+      if (!('webkitSpeechRecognition' in window)) {
+        alert('Speech Recognition not supported');
+        return;
+      }
+      recognition = new webkitSpeechRecognition();
+      recognition.lang = 'en-IN';
+      recognition.continuous = true;
+      recognition.interimResults = true;
+
+      recognition.onresult = function(e) {
+        let text = '';
+        for (let i = 0; i < e.results.length; i++) {
+          text += e.results[i][0].transcript + ' ';
+        }
+        document.getElementById('editor').innerText = text;
+      };
+
+      recognition.onerror = function(e) {
+        document.getElementById('status').innerText = 'Error: ' + e.error;
+      };
+
+      recognition.start();
+    }
+
+    function stopListening() {
+      if (recognition) recognition.stop();
+    }
+
+    window.startListening = startListening;
+    window.stopListening = stopListening;
+  </script>
+</body>
+</html>
