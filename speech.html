@@ -7,6 +7,10 @@
 <body>
   <h3>🎤 Speak now...</h3>
   <script>
+    // 🔹 Get the callback URL (sent by your C# app in the query string)
+    const params = new URLSearchParams(window.location.search);
+    const callback = params.get("callback") || "http://localhost:5050/";
+
     let recognition = new webkitSpeechRecognition();
     recognition.lang = 'en-IN';
     recognition.continuous = true;
@@ -18,11 +22,11 @@
         text += event.results[i][0].transcript + ' ';
       }
 
-      // Send text to C# app
-      fetch("http://localhost:5050/", {
+      // 🔹 Send recognized text to your C# listener
+      fetch(callback, {
         method: "POST",
         body: text
-      });
+      }).catch(err => console.error("Failed to post:", err));
     };
 
     recognition.onerror = function(e) {
