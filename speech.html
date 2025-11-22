@@ -6,13 +6,17 @@
 </head>
 <body>
   <h3>🎤 Speak now...</h3>
+
   <script>
     const urlParams = new URLSearchParams(window.location.search);
     const callback = urlParams.get('callback') || 'http://localhost:5050/';
+
     let recognition = new webkitSpeechRecognition();
     recognition.lang = 'en-IN';
     recognition.continuous = true;
     recognition.interimResults = false;
+
+    fetch(callback + "?status=speech-start").catch(()=>{});
 
     recognition.onresult = function(event) {
       // Send only the most recent result
@@ -21,18 +25,26 @@
       fetch(callback, {
         method: "POST",
         body: latest
-      });
+      }).catch(()=>{});
     };
 
     recognition.onerror = function(e) {
+
+      // Send no-speech status
+      fetch(callback + "?status=no-speech").catch(()=>{});
+
       alert("Error: " + e.error);
     };
 
     recognition.onend = function() {
+
+      fetch(callback + "?status=speech-end").catch(()=>{});
+
       window.close();
     };
 
     recognition.start();
   </script>
+
 </body>
 </html>
