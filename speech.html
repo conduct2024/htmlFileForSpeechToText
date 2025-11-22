@@ -19,7 +19,6 @@
     fetch(callback + "?status=speech-start").catch(()=>{});
 
     recognition.onresult = function(event) {
-      // Send only the most recent result
       let latest = event.results[event.results.length - 1][0].transcript.trim();
 
       fetch(callback, {
@@ -30,7 +29,6 @@
 
     recognition.onerror = function(e) {
 
-      // Send no-speech status
       fetch(callback + "?status=no-speech").catch(()=>{});
 
       alert("Error: " + e.error);
@@ -44,6 +42,11 @@
     };
 
     recognition.start();
+
+    window.onbeforeunload = function() {
+        fetch(callback + "?status=chrome-closed").catch(()=>{});
+    };
+
   </script>
 
 </body>
